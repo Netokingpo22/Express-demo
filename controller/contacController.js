@@ -1,17 +1,17 @@
 const AsyncHandler = require("express-async-handler");
 const Contact = require("../models/contactModel");
 
-//@desc Get all contacts
-//@router GET /api/contacts
-//@access private
+// @desc    Get all contacts
+// @route   GET /api/contacts
+// @access  Private
 const getContacts = AsyncHandler(async (req, res) => {
-    const c = await Contact.find({ user_id: req.user.id });
-    res.status(200).json(c);
-})
+    const contacts = await Contact.find({ user_id: req.user.id });
+    res.status(200).json(contacts);
+});
 
-//@desc Get contact
-//@router GET /api/contacts/:id
-//@access private
+// @desc    Get a contact by ID
+// @route   GET /api/contacts/:id
+// @access  Private
 const getContact = AsyncHandler(async (req, res) => {
     const contact = await Contact.findById(req.params.id);
     if (!contact) {
@@ -20,29 +20,29 @@ const getContact = AsyncHandler(async (req, res) => {
     }
     if (contact.user_id.toString() !== req.user.id) {
         res.status(403);
-        throw new Error('Contact is not valid for user');
+        throw new Error('Unauthorized access');
     }
     res.status(200).json(contact);
 });
 
-//@desc Post contact
-//@router POST /api/contacts
-//@access private
+// @desc    Create a new contact
+// @route   POST /api/contacts
+// @access  Private
 const postContact = AsyncHandler(async (req, res) => {
     const { name, email, phone } = req.body;
     if (!name || !email || !phone) {
         res.status(400);
         throw new Error("All fields are required");
     }
-    const c = await Contact.create({
+    const newContact = await Contact.create({
         name, email, phone, user_id: req.user.id
-    })
-    res.status(201).json(c);
-})
+    });
+    res.status(201).json(newContact);
+});
 
-//@desc Put contact
-//@router PUT /api/contacts/:id
-//@access private
+// @desc    Update a contact
+// @route   PUT /api/contacts/:id
+// @access  Private
 const putContact = AsyncHandler(async (req, res) => {
     const contact = await Contact.findById(req.params.id);
     if (!contact) {
@@ -51,7 +51,7 @@ const putContact = AsyncHandler(async (req, res) => {
     }
     if (contact.user_id.toString() !== req.user.id) {
         res.status(403);
-        throw new Error('Contact is not valid for user');
+        throw new Error('Unauthorized access');
     }
     const updatedContact = await Contact.findByIdAndUpdate(
         req.params.id,
@@ -59,23 +59,23 @@ const putContact = AsyncHandler(async (req, res) => {
         { new: true }
     );
     res.status(200).json(updatedContact);
-})
+});
 
-//@desc Delete contact
-//@router DELETE /api/contacts/:id
-//@access private
+// @desc    Delete a contact
+// @route   DELETE /api/contacts/:id
+// @access  Private
 const deleteContact = AsyncHandler(async (req, res) => {
-    const contact = await await Contact.findById(req.params.id);
+    const contact = await Contact.findById(req.params.id);
     if (!contact) {
         res.status(404);
         throw new Error('Contact not found');
     }
     if (contact.user_id.toString() !== req.user.id) {
         res.status(403);
-        throw new Error('Contact is not valid for user');
+        throw new Error('Unauthorized access');
     }
-    await Contact.findOneAndDelete(req.params.id)
-    res.status(200).json(contact);
-})
+    await Contact.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Contact deleted successfully' });
+});
 
-module.exports = { getContacts, getContact, postContact, putContact, deleteContact }
+module.exports = { getContacts, getContact, postContact, putContact, deleteContact };

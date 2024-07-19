@@ -1,11 +1,20 @@
 const express = require('express');
 const router = express.Router();
 
-const { getContacts, getContact, postContact, putContact, deleteContact } = require('../controller/contacController')
-const ValidateToken = require('../middleware/validateTokenHandler');
+const { getContacts, getContact, postContact, putContact, deleteContact } = require('../controller/contacController');
+const validateToken = require('../middleware/validateTokenHandler');
 
-router.use(ValidateToken);
-router.route('/').get(getContacts).post(postContact);
-router.route('/:id').get(getContact).put(putContact).delete(deleteContact);
+// Middleware to validate token for all routes
+router.use(validateToken);
+
+// Routes for contacts
+router.route('/')
+    .get(getContacts)  // Get all contacts
+    .post(postContact); // Create a new contact
+
+router.route('/:id')
+    .get(getContact)    // Get a specific contact by ID
+    .put(putContact)    // Update a specific contact by ID
+    .delete(deleteContact); // Delete a specific contact by ID
 
 module.exports = router;
